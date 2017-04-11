@@ -40,11 +40,16 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
         return
 
     while read_value:
+        i = 1
         for normalized_face, (x, y, w, h) in find_faces(webcam_image):
             prediction = model.predict(normalized_face)  # do prediction
             prediction = prediction[0]
+            # prediction = emotions_map[prediction]
             image_to_draw = emoticons[prediction]
             draw_with_alpha(webcam_image, image_to_draw, (x, y, w, h))
+            cv2.putText(webcam_image, (emotions[prediction]+" #{}").format(i), (x, y - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 255), 2)
+            i += 1
 
         cv2.imshow(window_name, webcam_image)
         read_value, webcam_image = vc.read()
@@ -57,13 +62,15 @@ def show_webcam_and_run(model, emoticons, window_size=None, window_name='webcam'
 
 
 if __name__ == '__main__':
-    emotions = ['neutral', 'anger', 'disgust', 'happy', 'sadness', 'surprise']
+    emotions =  ["neutral", "anger", "contempt", "disgust", "fear", "happy", "sadness", "surprise"]
+    # emotions = ['neutral', 'anger', 'disgust', 'happy', 'sadness', 'surprise']
+    # emotions_map = {0:0, 1:1, 2:0, 3:2, 4:0, 5:3, 6:4, 7:5 }
     emoticons = _load_emoticons(emotions)
-
+    
 
     fisher_face = cv2.face.createFisherFaceRecognizer()
     fisher_face.load('models/emotion_detection_model.xml')
 
-    # use learnt model
+     # use learnt model
     window_name = 'WEBCAM (press ESC to exit)'
     show_webcam_and_run(fisher_face, emoticons, window_size=(1600, 1200), window_name=window_name, update_time=8)
